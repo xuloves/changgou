@@ -19,7 +19,7 @@ public interface ${Table}Feign {
      * @param size
      * @return
      */
-    @PostMapping(value = "/search/{page}/{size}" )
+    @PostMapping(value = "/com.changgou.search/{page}/{size}" )
     Result<PageInfo> findPage(@RequestBody(required = false) ${Table} ${table}, @PathVariable  int page, @PathVariable  int size);
 
     /***
@@ -28,7 +28,7 @@ public interface ${Table}Feign {
      * @param size:每页显示多少条
      * @return
      */
-    @GetMapping(value = "/search/{page}/{size}" )
+    @GetMapping(value = "/com.changgou.search/{page}/{size}" )
     Result<PageInfo> findPage(@PathVariable  int page, @PathVariable  int size);
 
     /***
@@ -36,7 +36,7 @@ public interface ${Table}Feign {
      * @param ${table}
      * @return
      */
-    @PostMapping(value = "/search" )
+    @PostMapping(value = "/com.changgou.search" )
     Result<List<${Table}>> findList(@RequestBody(required = false) ${Table} ${table});
 
     /***

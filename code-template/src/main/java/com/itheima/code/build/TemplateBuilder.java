@@ -247,7 +247,7 @@ public class TemplateBuilder {
 
         //3.搜索  方法
         SwaggerPath searchPath = new SwaggerPath(Table,table);
-        searchPath.setPath("/"+table+"/search");//设置请求路径
+        searchPath.setPath("/"+table+"/com.changgou.search");//设置请求路径
         //初始化方法
         List<SwaggerMethod> searchMethods = searchMethod(Table, table);
         searchPath.setMethods(searchMethods);
@@ -255,7 +255,7 @@ public class TemplateBuilder {
 
         //4.分页条件搜索  方法
         SwaggerPath pageSearchPath = new SwaggerPath(Table,table);
-        pageSearchPath.setPath("/"+table+"/search/{page}/{size}");//设置请求路径
+        pageSearchPath.setPath("/"+table+"/com.changgou.search/{page}/{size}");//设置请求路径
         //初始化方法
         List<SwaggerMethod> pageSearchMethods =searchPage(Table,table);
         pageSearchPath.setMethods(pageSearchMethods);

@@ -9,6 +9,7 @@
     </parent>
     <modules>
         <module>changgou-service-goods-api</module>
+        <module>changgou-service-search-api</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>

@@ -37,7 +37,7 @@ public class ${Table}Controller {
             @ApiImplicitParam(paramType = "path", name = "size", value = "每页显示条数", required = true, dataType = "Integer")
     })
     </#if>
-    @PostMapping(value = "/search/{page}/{size}" )
+    @PostMapping(value = "/com.changgou.search/{page}/{size}" )
     public Result<PageInfo> findPage(@RequestBody(required = false) <#if swagger==true>@ApiParam(name = "${Table}对象",value = "传入JSON数据",required = false)</#if> ${Table} ${table}, @PathVariable  int page, @PathVariable  int size){
         //调用${Table}Service实现分页条件查询${Table}
         PageInfo<${Table}> pageInfo = ${table}Service.findPage(${table}, page, size);
@@ -57,7 +57,7 @@ public class ${Table}Controller {
             @ApiImplicitParam(paramType = "path", name = "size", value = "每页显示条数", required = true, dataType = "Integer")
     })
     </#if>
-    @GetMapping(value = "/search/{page}/{size}" )
+    @GetMapping(value = "/com.changgou.search/{page}/{size}" )
     public Result<PageInfo> findPage(@PathVariable  int page, @PathVariable  int size){
         //调用${Table}Service实现分页查询${Table}
         PageInfo<${Table}> pageInfo = ${table}Service.findPage(page, size);
@@ -72,7 +72,7 @@ public class ${Table}Controller {
     <#if swagger==true>
     @ApiOperation(value = "${Table}条件查询",notes = "条件查询${Table}方法详情",tags = {"${Table}Controller"})
     </#if>
-    @PostMapping(value = "/search" )
+    @PostMapping(value = "/com.changgou.search" )
     public Result<List<${Table}>> findList(@RequestBody(required = false) <#if swagger==true>@ApiParam(name = "${Table}对象",value = "传入JSON数据",required = false)</#if> ${Table} ${table}){
         //调用${Table}Service实现条件查询${Table}
         List<${Table}> list = ${table}Service.findList(${table});
