@@ -40,6 +40,14 @@ public class SkuController {
      */
     @PostMapping
     public Map search(@RequestBody(required = false) Map searchMap){
+        Object pageNum = searchMap.get("pageNum");
+        if(pageNum==null){
+            searchMap.put("pageNum","1");
+        }
+        if(pageNum instanceof Integer){
+            searchMap.put("pageNum",pageNum.toString());
+        }
+
        return  skuService.search(searchMap);
     }
 }
