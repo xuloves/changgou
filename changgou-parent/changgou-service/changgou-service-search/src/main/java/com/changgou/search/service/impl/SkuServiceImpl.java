@@ -77,22 +77,26 @@ public class SkuServiceImpl implements SkuService {
 
 
     /**
-     * @param searchMap key:
-     *                  category     商品分类的过滤查询
-     *                  <p>
-     *                  brand        商品品牌的过滤查询   TCL
-     *                  <p>
-     *                  spec_规格的名称   value  规格的值      规格相关
-     *                  <p>
-     *                  price           value 价格区间的字符串 0-500   3000-*
-     *                  <p>
-     *                  <p>
-     *                  pageNum   当前的页码
-     *                  pageSize  不用传递   (写死)
-     *                  <p>
-     *                  <p>
-     *                  sortField  要排序的字段  price
-     *                  sortRule   要排序的规则 (ASC DESC)
+     *
+     * @param searchMap
+     * key:
+     *      category     商品分类的过滤查询
+     *
+     *      brand        商品品牌的过滤查询   TCL
+     *
+     *      spec_规格的名称   value  规格的值      规格相关
+     *
+     *      price           value 价格区间的字符串 0-500   3000-*
+     *
+     *
+     *      pageNum   当前的页码
+     *      pageSize  不用传递   (写死)
+     *
+     *
+     *      sortField  要排序的字段  price
+     *      sortRule   要排序的规则 (ASC DESC)
+     *
+     *
      * @return
      */
 
@@ -131,12 +135,15 @@ public class SkuServiceImpl implements SkuService {
         nativeSearchQueryBuilder.withHighlightBuilder(new HighlightBuilder().preTags("<em style=\"color:red\">").postTags("</em>"));
 
 
+
+
         //匹配查询  先分词 再查询  主条件查询
         //参数1 指定要搜索的字段
         //参数2 要搜索的值(先分词 再搜索)
         //nativeSearchQueryBuilder.withQuery(QueryBuilders.matchQuery("name", keywords));
         //从多个字段中搜索数据
-        nativeSearchQueryBuilder.withQuery(QueryBuilders.multiMatchQuery(keywords, "name", "categoryName", "brandName"));
+        nativeSearchQueryBuilder.withQuery(QueryBuilders.multiMatchQuery(keywords,"name","categoryName","brandName"));
+
 
 
         //========================过滤查询 开始=====================================
@@ -146,36 +153,36 @@ public class SkuServiceImpl implements SkuService {
         //4.4 过滤查询的条件设置   商品分类的条件
         String category = searchMap.get("category");
 
-        if (!StringUtils.isEmpty(category)) {
+        if(!StringUtils.isEmpty(category)) {
             boolQueryBuilder.filter(QueryBuilders.termQuery("categoryName", category));
         }
         //4.5 过滤查询的条件设置   商品品牌的条件
         String brand = searchMap.get("brand");
 
-        if (!StringUtils.isEmpty(brand)) {
+        if(!StringUtils.isEmpty(brand)) {
             boolQueryBuilder.filter(QueryBuilders.termQuery("brandName", brand));
         }
 
         //4.6 过滤查询的条件设置   规格条件
 
-        if (searchMap != null) {
+        if(searchMap!=null){
             for (String key : searchMap.keySet()) {//{ brand:"",category:"",spec_网络:"电信4G"}
-                if (key.startsWith("spec_")) {
+                if(key.startsWith("spec_"))  {
                     //截取规格的名称
-                    boolQueryBuilder.filter(QueryBuilders.termQuery("specMap." + key.substring(5) + ".keyword", searchMap.get(key)));
+                    boolQueryBuilder.filter(QueryBuilders.termQuery("specMap."+key.substring(5)+".keyword", searchMap.get(key)));
                 }
             }
         }
         //4.7 过滤查询的条件设置   价格区间的过滤查询
         String price = searchMap.get("price");// 0-500  3000-*
-        if (!StringUtils.isEmpty(price)) {
+        if(!StringUtils.isEmpty(price)){
             //获取值 按照- 切割
             String[] split = price.split("-");
             //过滤范围查询
             //0<=price<=500
-            if (!split[1].equals("*")) {
+            if(!split[1].equals("*")) {
                 boolQueryBuilder.filter(QueryBuilders.rangeQuery("price").from(split[0], true).to(split[1], true));
-            } else {
+            }else{
                 boolQueryBuilder.filter(QueryBuilders.rangeQuery("price").gte(split[0]));
             }
 
@@ -193,20 +200,20 @@ public class SkuServiceImpl implements SkuService {
         //第一个参数:指定当前的页码  注意: 如果是第一页 数值为0
         //第二个参数:指定当前的页的显示的行
         String pageNum1 = searchMap.get("pageNum");
-        Integer pageNum = Integer.valueOf(pageNum1);
+        Integer pageNum=Integer.valueOf(pageNum1);
 
-        Integer pageSize = 30;
+        Integer pageSize=30;
 
-        nativeSearchQueryBuilder.withPageable(PageRequest.of(pageNum - 1, pageSize));
+        nativeSearchQueryBuilder.withPageable(PageRequest.of(pageNum-1,pageSize));
 
 
         //排序操作
         //获取排序的字段 和要排序的规则
         String sortField = searchMap.get("sortField");//price
         String sortRule = searchMap.get("sortRule");//DESC ASC
-        if (!StringUtils.isEmpty(sortField) && !StringUtils.isEmpty(sortRule)) {
+        if(!StringUtils.isEmpty(sortField) && !StringUtils.isEmpty(sortRule)) {
             //执行排序
-            nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort(sortField).order(sortRule.equalsIgnoreCase("ASC") ? SortOrder.ASC : SortOrder.DESC));
+            nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort(sortField).order(sortRule.equalsIgnoreCase("ASC")?SortOrder.ASC:SortOrder.DESC));
             //nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort(sortField).order(SortOrder.valueOf(sortRule)));
         }
 
@@ -214,7 +221,7 @@ public class SkuServiceImpl implements SkuService {
         NativeSearchQuery nativeSearchQuery = nativeSearchQueryBuilder.build();
 
         //6.执行查询
-        AggregatedPage<SkuInfo> skuInfos = elasticsearchTemplate.queryForPage(nativeSearchQuery, SkuInfo.class, new SearchResultMapperImpl());
+        AggregatedPage<SkuInfo> skuInfos = elasticsearchTemplate.queryForPage(nativeSearchQuery, SkuInfo.class,new SearchResultMapperImpl());
 
 
         // 6.2 获取聚合分组结果  获取商品分类的列表数据
@@ -244,6 +251,8 @@ public class SkuServiceImpl implements SkuService {
         resultMap.put("rows", content);
         resultMap.put("total", totalElements);
         resultMap.put("totalPages", totalPages);
+        resultMap.put("pageNum",pageNum);
+        resultMap.put("pageSize",pageSize);
         return resultMap;
     }
 
