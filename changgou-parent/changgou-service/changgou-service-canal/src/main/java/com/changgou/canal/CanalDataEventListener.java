@@ -4,50 +4,55 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.otter.canal.protocol.CanalEntry;
 import com.changgou.content.feign.ContentFeign;
 import com.changgou.content.pojo.Content;
+import com.changgou.item.feign.PageFeign;
 import com.xpand.starter.canal.annotation.*;
 import entity.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import sun.rmi.runtime.Log;
 
 import java.util.List;
 
 /**
- * @author 今何许
- * @date 2021-02-04 13:30
+ * 监听类 监听数据的变化做处理
+ *
+ * @author www.itheima.com
+ * @version 1.0
+ * @package com.changgou.listener *
+ * @since 1.0
  */
+// 事件监听的注解 监听数据库的变化
 @CanalEventListener
 public class CanalDataEventListener {
+
     //当数据被添加的时候触发
     // CanalEntry.EventType eventType  监听到的操作的类型  INSERT  UPDATE ,DELETE ,CREATE INDEX ,GRAND
     // CanalEntry.RowData rowData 被修改的数据()
-    //rowData.getAfterColumnsList()修改之后的数据
-    //rowData.getBeforeColumnsList()修改之前数据
-   /* @InsertListenPoint
-    public void onEventInsert(CanalEntry.EventType eventType, CanalEntry.RowData rowData) {
+ /*   @InsertListenPoint
+    public void onEvent(CanalEntry.EventType eventType, CanalEntry.RowData rowData) {
         //do something...
+
         List<CanalEntry.Column> afterColumnsList = rowData.getAfterColumnsList();
         for (CanalEntry.Column column : afterColumnsList) {
-            System.out.println(column.getName() + ":" + column.getValue());
+            System.out.println(column.getName()+":"+column.getValue());
         }
     }*/
-
     //当数据被更新的时候触发
-   /* @UpdateListenPoint
-    public void onEventUpdate(CanalEntry.RowData rowData) {
+    /*@UpdateListenPoint
+    public void onEvent1(CanalEntry.RowData rowData) {
         //do something...
         List<CanalEntry.Column> afterColumnsList = rowData.getAfterColumnsList();
         for (CanalEntry.Column column : afterColumnsList) {
-            System.out.println(column.getName() + ":" + column.getValue());
+            System.out.println(column.getName()+":"+column.getValue());
         }
     }*/
-
     // 当数据被删除的时候触发
    /* @DeleteListenPoint
-    public void onEventDelete(CanalEntry.EventType eventType, CanalEntry.RowData rowData) {
+    public void onEvent3(CanalEntry.EventType eventType, CanalEntry.RowData rowData) {
         //do something...
         List<CanalEntry.Column> afterColumnsList = rowData.getAfterColumnsList();
         for (CanalEntry.Column column : afterColumnsList) {
-            System.out.println(column.getName() + ":" + column.getValue());
+            System.out.println(column.getName()+":"+column.getValue());
         }
     }*/
 
@@ -56,20 +61,23 @@ public class CanalDataEventListener {
     //schema = "canal-test" 要监听的数据库实例
     //table = {"t_user", "test_table"},   要监听的表
     // eventType = CanalEntry.EventType.UPDATE  要监听的类型
-   /* @ListenPoint(destination = "example", schema = "changgou_content", table = {"tb_content"}, eventType = {CanalEntry.EventType.UPDATE, CanalEntry.EventType.INSERT, CanalEntry.EventType.DELETE})
+    /*@ListenPoint(destination = "example", schema = "changgou_content", table = {"tb_content"}, eventType = {CanalEntry.EventType.UPDATE,CanalEntry.EventType.INSERT,CanalEntry.EventType.DELETE})
     public void onEvent4(CanalEntry.EventType eventType, CanalEntry.RowData rowData) {
         //do something...
 
         List<CanalEntry.Column> afterColumnsList = rowData.getAfterColumnsList();
         for (CanalEntry.Column column : afterColumnsList) {
-            System.out.println(column.getName() + ":" + column.getValue());
+            System.out.println(column.getName()+":"+column.getValue());
         }
     }*/
+
+
     @Autowired
     private ContentFeign contentFeign;
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
     /**
      * @param eventType
      * @param rowData
@@ -84,7 +92,7 @@ public class CanalDataEventListener {
         //3.存储到redis中
         List<Content> data = byCategory.getData();//List
         //4.
-        stringRedisTemplate.boundValueOps("content_"+categoryId).set(JSON.toJSONString(data));
+        stringRedisTemplate.boundValueOps("content_" + categoryId).set(JSON.toJSONString(data));
     }
 
     private String getColumnValue(CanalEntry.EventType eventType, CanalEntry.RowData rowData) {
@@ -112,5 +120,43 @@ public class CanalDataEventListener {
         }
         //3.返回
         return categoryId;
+    }
+
+    //监听商品数据库的spu的表的数据的变化,变了,调用feign 生成静态页就可以了
+
+    @Autowired
+    private PageFeign pageFeign;
+
+    @ListenPoint(destination = "example",
+            schema = "changgou_goods",
+            table = {"tb_spu"},
+            eventType = {CanalEntry.EventType.UPDATE, CanalEntry.EventType.INSERT, CanalEntry.EventType.DELETE})
+    public void onEventCustomSpu(CanalEntry.EventType eventType, CanalEntry.RowData rowData) {
+
+        //判断操作类型
+        if (eventType == CanalEntry.EventType.DELETE) {
+            String spuId = "";
+            List<CanalEntry.Column> beforeColumnsList = rowData.getBeforeColumnsList();
+            for (CanalEntry.Column column : beforeColumnsList) {
+                if (column.getName().equals("id")) {
+                    spuId = column.getValue();//spuid
+                    break;
+                }
+            }
+            //todo 删除静态页
+
+        } else {
+            //新增 或者 更新
+            List<CanalEntry.Column> afterColumnsList = rowData.getAfterColumnsList();
+            String spuId = "";
+            for (CanalEntry.Column column : afterColumnsList) {
+                if (column.getName().equals("id")) {
+                    spuId = column.getValue();
+                    break;
+                }
+            }
+            //更新 生成静态页
+            pageFeign.createHtml(Long.valueOf(spuId));
+        }
     }
 }

@@ -15,7 +15,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableEurekaClient
 //启用canal
 @EnableCanalClient
-@EnableFeignClients(basePackages = "com.changgou.content.feign")
+@EnableFeignClients(basePackages = {"com.changgou.content.feign","com.changgou.item.feign"})
 public class CanalApplication {
     public static void main(String[] args) {
         SpringApplication.run(CanalApplication.class, args);
