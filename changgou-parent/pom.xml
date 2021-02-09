@@ -17,6 +17,7 @@
         <module>changgou-commons</module>
         <module>changgou-common-db</module>
         <module>changgou-service-api</module>
+        <module>changgou-user-oauth</module>
     </modules>
     <packaging>pom</packaging>
     <properties>
