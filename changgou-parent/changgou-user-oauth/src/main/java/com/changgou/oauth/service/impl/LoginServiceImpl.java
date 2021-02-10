@@ -57,7 +57,7 @@ public class LoginServiceImpl implements LoginService {
          * 参数2  指定要发送的请求的方法 PSOT
          * 参数3 指定请求实体(包含头和请求体数据)
          */
-        HttpEntity<MultiValueMap> requestentity = new HttpEntity<>(formData,headers);
+        HttpEntity<MultiValueMap> requestentity = new HttpEntity<MultiValueMap>(formData,headers);
 
         ResponseEntity<Map> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestentity, Map.class);
         //5.接收到返回的响应(就是:令牌的信息)
