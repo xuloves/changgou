@@ -1,4 +1,4 @@
-package com.changgou.user.config;
+package com.changgou.goods.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -82,13 +82,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         //放行 用户注册的请求
         //其他的请求  必须有登录之后才能访问 (校验token合法才可以访问)
 
-
         //所有请求必须认证通过
         http.authorizeRequests()
-                //下边的路径放行
-                .antMatchers(
-                        "/user/add","/user/login","/user/load/*"). //配置地址放行
-                permitAll()
                 .anyRequest()
                 .authenticated();    //其他地址需要认证授权
     }

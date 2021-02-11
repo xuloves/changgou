@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +100,7 @@ public class SpuServiceImpl implements SpuService {
     public Example createExample(Spu spu) {
         Example example = new Example(Spu.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("isDelete", 0);//只找 没有被删除的
+        criteria.andEqualTo("isDelete",0);//只找 没有被删除的
         if (spu != null) {
             // 主键
             if (!StringUtils.isEmpty(spu.getId())) {
@@ -203,7 +202,7 @@ public class SpuServiceImpl implements SpuService {
     @Override
     public void delete(Long id) {
         Spu spu = spuMapper.selectByPrimaryKey(id);
-        if (spu == null) {
+        if(spu==null){
             throw new RuntimeException("商品不存在");
         }
         if (!spu.getIsDelete().equals("1")) {
@@ -286,11 +285,6 @@ public class SpuServiceImpl implements SpuService {
             // id 要生成
             sku.setId(idWorker.nextId());
             // name 要生成 (spu的名称+ " "+ 规格的选项的值 )  //  spu的名称: iphonex  规格的数据: spec:{ 颜色:红色,内存大小:16G}
-
-            //构建SKU名称，采用SPU+规格值组装
-            if (StringUtils.isEmpty(sku.getSpec())) {
-                sku.setSpec("{}");
-            }
             // 先获取规格的数据
             String spec = sku.getSpec(); //{ 颜色:红色,内存大小:16G}
             Map<String, String> map = JSON.parseObject(spec, Map.class);
@@ -364,7 +358,7 @@ public class SpuServiceImpl implements SpuService {
             throw new RuntimeException("商品不存在或者已经删除");
         }
 
-        if (!spu.getStatus().equals("1") || !spu.getIsMarketable().equals("1")) {
+        if(!spu.getStatus().equals("1") || !spu.getIsMarketable().equals("1")){
             throw new RuntimeException("商品必须要审核或者商品必须要是上架的状态");
         }
 
@@ -377,11 +371,11 @@ public class SpuServiceImpl implements SpuService {
     public void logicDeleteSpu(Long id) {
         // update set is_delete=1 where id =? and is_delete=0
         Spu spu = spuMapper.selectByPrimaryKey(id);
-        if (spu == null) {
+        if(spu==null){
             throw new RuntimeException("商品不存在");
         }
 
-        if (spu.getIsMarketable().equals("1")) {
+        if(spu.getIsMarketable().equals("1")){
             throw new RuntimeException("商品还没下架,不能删除");
         }
         spu.setIsDelete("1");
@@ -393,56 +387,17 @@ public class SpuServiceImpl implements SpuService {
     public void restoreSpu(Long id) {
         // update set is_delete=0 where id =? and is_delete=1
         Spu spu = spuMapper.selectByPrimaryKey(id);
-        if (spu == null) {
+        if(spu==null){
             throw new RuntimeException("商品不存在");
         }
         Spu data = new Spu();
         data.setIsDelete("0");//恢复
         Example exmaple = new Example(Spu.class);
         Example.Criteria criteria = exmaple.createCriteria();
-        criteria.andEqualTo("id", id);//where id =1
-        criteria.andEqualTo("isDelete", "1");
-        spuMapper.updateByExampleSelective(data, exmaple);
+        criteria.andEqualTo("id",id);//where id =1
+        criteria.andEqualTo("isDelete","1");
+        spuMapper.updateByExampleSelective(data,exmaple);
 // spuMapper.updateByPrimaryKeySelective(spu);//根据主键来进行更新  update set name=? where id=?
-    }
-
-    /***
-     * 批量上架
-     * @param ids:需要上架的商品ID集合
-     * @return
-     */
-    @Override
-    public int putMany(Long[] ids) {
-        Spu spu = new Spu();
-        spu.setIsMarketable("1");//上架
-        //批量修改
-        Example example = new Example(Spu.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andIn("id", Arrays.asList(ids));//id
-        //下架
-        criteria.andEqualTo("isMarketable", "0");
-        //审核通过的
-        criteria.andEqualTo("status", "1");
-        //非删除的
-        criteria.andEqualTo("isDelete", "0");
-        return spuMapper.updateByExampleSelective(spu, example);
-    }
-
-    @Override
-    public int pullMany(Long[] ids) {
-        Spu spu = new Spu();
-        spu.setIsMarketable("0");//下架
-        //批量修改
-        Example example = new Example(Spu.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andIn("id", Arrays.asList(ids));//id
-        //上架
-        criteria.andEqualTo("isMarketable", "1");
-        //审核通过的
-        criteria.andEqualTo("status", "1");
-        //非删除的
-        criteria.andEqualTo("isDelete", "0");
-        return spuMapper.updateByExampleSelective(spu, example);
     }
 
 

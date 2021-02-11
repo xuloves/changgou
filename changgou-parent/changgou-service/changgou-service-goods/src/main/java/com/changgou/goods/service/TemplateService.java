@@ -63,6 +63,4 @@ public interface TemplateService {
      * @return
      */
     List<Template> findAll();
-
-    Template findByCategoryId(Integer id);
 }

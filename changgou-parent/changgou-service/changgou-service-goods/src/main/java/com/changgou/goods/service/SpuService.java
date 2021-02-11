@@ -1,11 +1,8 @@
 package com.changgou.goods.service;
-
 import com.changgou.goods.pojo.Goods;
 import com.changgou.goods.pojo.Spu;
 import com.github.pagehelper.PageInfo;
-
 import java.util.List;
-
 /****
  * @Author:admin
  * @Description:Spu业务层接口
@@ -57,11 +54,10 @@ public interface SpuService {
 
     /**
      * 根据ID查询Spu
-     *
      * @param id
      * @return
      */
-    Spu findById(Long id);
+     Spu findById(Long id);
 
     /***
      * 查询所有Spu
@@ -71,8 +67,7 @@ public interface SpuService {
 
     /**
      * 添加商品(SPU+ SKUlIST)
-     *
-     * @param goods update  add
+     * @param goods   update  add
      */
     void save(Goods goods);
 
@@ -82,7 +77,6 @@ public interface SpuService {
 
     /**
      * 下架
-     *
      * @param id
      */
     void pullSpu(Long id);
@@ -91,8 +85,4 @@ public interface SpuService {
 
 
     void restoreSpu(Long id);
-
-    int putMany(Long[] ids);
-
-    int pullMany(Long[] ids);
 }
