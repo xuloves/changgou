@@ -284,9 +284,14 @@ public class OrderServiceImpl implements OrderService {
         userFeign.addPoints(10, order.getUsername());
 
 
-        //5.清空当前的用户的redis中的购物车
+        //线上支付，记录订单
+        if(order.getPayType().equalsIgnoreCase("1")){
+            //将支付记录存入到Reids namespace  key  value
+            redisTemplate.boundHashOps("Order").put(order.getId(),order);
+        }
 
-        redisTemplate.delete("Cart_" + order.getUsername());
+        //删除购物车信息
+        //redisTemplate.delete("Cart_" + order.getUsername());
 
 
         //调用定时任务
@@ -329,5 +334,19 @@ public class OrderServiceImpl implements OrderService {
         order.setTransactionId(transaction_id);
         //3.更新到数据库
         orderMapper.updateByPrimaryKeySelective(order);
+        //2.删除Redis中的订单记录
+        redisTemplate.boundHashOps("Order").delete(out_trade_no);
+    }
+
+    @Override
+    public void deleteOrder(String out_trade_no) {
+        //改状态
+        Order order = (Order) redisTemplate.boundHashOps("Order").get(out_trade_no);
+        order.setUpdateTime(new Date());
+        order.setPayStatus("2");    //支付失败
+        orderMapper.updateByPrimaryKeySelective(order);
+
+        //删除缓存
+        redisTemplate.boundHashOps("Order").delete(out_trade_no);
     }
 }
